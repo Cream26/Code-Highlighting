@@ -10,14 +10,14 @@
         <el-button type="info">Success</el-button>
         <el-button type="info">Success</el-button>
         <el-button type="info">Success</el-button>
-        <el-divider direction="vertical" class="h-8"/>
+        <el-divider direction="vertical" class="h-8" />
         <el-switch
           v-model="dark"
           :active-action-icon="Moon"
           :inactive-action-icon="Sunny"
           @change="changeTheme"
         ></el-switch>
-        <el-divider direction="vertical" class="h-8"/>
+        <el-divider direction="vertical" class="h-8" />
         <img
           class="img mx-1 transition-transform transform hover:scale-110 active:scale-90"
           src="../image/Mail.svg"
@@ -36,12 +36,17 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
+import $bus from '../bus'
 import { Moon, Sunny } from '@element-plus/icons-vue'
 const dark = ref<boolean>(false)
 const changeTheme = () => {
   const root = document.documentElement
   dark.value ? (root.className = 'dark') : (root.className = '')
+  $bus.emit('changeTheme', dark.value)
+  
 }
+
+
 const sendEmail = () => {
   const recipientEmail: string = 'zhangtao4901@gmail.com'
   const subject: string = 'About the highlight'

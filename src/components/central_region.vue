@@ -50,11 +50,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import * as monaco from 'monaco-editor'
+import $bus from '../bus';
 
 const editorContainer = ref(null)
 const previewContainer = ref(null)
-let leftEditor
-let previewEditor
+let leftEditor: any
+let previewEditor: any
 const container = ref<HTMLElement | null>(null)
 const leftWidth = ref(0) // Initial width of the left pane
 const rightWidth = ref(0) // Initial width of the right pane
@@ -94,25 +95,29 @@ const stopDrag = () => {
   document.removeEventListener('mouseup', stopDrag)
 }
 const highlightCode = () => {
-   console.log("Current language selection: ", value.value);
-  if (!leftEditor || !previewEditor || !value.value) return;
+  console.log('Current language selection: ', value.value)
+  if (!leftEditor || !previewEditor || !value.value) return
 
   // 获取左侧编辑器的内容
-  const code = leftEditor.getValue();
+  const code = leftEditor.getValue()
 
   // 更新右侧预览编辑器的内容
-  previewEditor.setValue(code);
+  previewEditor.setValue(code)
 
   // 重点在这里：设置右侧编辑器的语言，触发语法高亮
-  monaco.editor.setModelLanguage(previewEditor.getModel(), value.value);
-};
-
+  monaco.editor.setModelLanguage(previewEditor.getModel(), value.value)
+}
 
 onMounted(() => {
   // Set initial width for left and right panes
   const containerWidth = container.value?.offsetWidth || 0
   leftWidth.value = containerWidth / 2
   rightWidth.value = containerWidth / 2
+  $bus.on("changeTheme", (dark) => {
+  const theme = dark ? "vs-dark" : "vs-light";
+  leftEditor.updateOptions({ theme });
+  previewEditor.updateOptions({ theme });
+});
 
   if (editorContainer.value) {
     leftEditor = monaco.editor.create(editorContainer.value, {
@@ -122,7 +127,7 @@ onMounted(() => {
         'Start typing Markdown here and see the preview on the right.'
       ].join('\n'),
       language: 'plaintext',
-      theme: 'vs-light',
+      // theme:"vs-dark",
       automaticLayout: true,
       contextmenu: false,
       scrollbar: {
@@ -133,15 +138,15 @@ onMounted(() => {
       tabSize: 2,
       scrollBeyondLastLine: false
     })
-    
   }
   if (previewContainer.value) {
     previewEditor = monaco.editor.create(previewContainer.value, {
       value: '',
       language: 'plaintext',
-      theme: 'vs-light',
+      // theme:"vs-dark",
       readOnly: true,
       automaticLayout: true,
+      contextmenu: false,
       scrollbar: {
         verticalScrollbarSize: 6,
         horizontalScrollbarSize: 6
