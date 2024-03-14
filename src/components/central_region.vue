@@ -48,9 +48,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import * as monaco from 'monaco-editor'
-import $bus from '../bus';
+import $bus from '../bus'
 
 const editorContainer = ref(null)
 const previewContainer = ref(null)
@@ -95,29 +95,24 @@ const stopDrag = () => {
   document.removeEventListener('mouseup', stopDrag)
 }
 const highlightCode = () => {
-  console.log('Current language selection: ', value.value)
   if (!leftEditor || !previewEditor || !value.value) return
 
-  // 获取左侧编辑器的内容
   const code = leftEditor.getValue()
 
-  // 更新右侧预览编辑器的内容
   previewEditor.setValue(code)
 
-  // 重点在这里：设置右侧编辑器的语言，触发语法高亮
   monaco.editor.setModelLanguage(previewEditor.getModel(), value.value)
 }
-
 onMounted(() => {
   // Set initial width for left and right panes
   const containerWidth = container.value?.offsetWidth || 0
   leftWidth.value = containerWidth / 2
   rightWidth.value = containerWidth / 2
-  $bus.on("changeTheme", (dark) => {
-  const theme = dark ? "vs-dark" : "vs-light";
-  leftEditor.updateOptions({ theme });
-  previewEditor.updateOptions({ theme });
-});
+  $bus.on('changeTheme', (dark) => {
+    const theme = dark ? 'vs-dark' : 'vs-light'
+    leftEditor.updateOptions({ theme })
+    previewEditor.updateOptions({ theme })
+  })
 
   if (editorContainer.value) {
     leftEditor = monaco.editor.create(editorContainer.value, {
@@ -127,7 +122,7 @@ onMounted(() => {
         'Start typing Markdown here and see the preview on the right.'
       ].join('\n'),
       language: 'plaintext',
-      // theme:"vs-dark",
+
       automaticLayout: true,
       contextmenu: false,
       scrollbar: {
@@ -139,11 +134,14 @@ onMounted(() => {
       scrollBeyondLastLine: false
     })
   }
+  leftEditor.onDidChangeModelContent((event) => {
+    highlightCode()
+  })
   if (previewContainer.value) {
     previewEditor = monaco.editor.create(previewContainer.value, {
       value: '',
       language: 'plaintext',
-      // theme:"vs-dark",
+
       readOnly: true,
       automaticLayout: true,
       contextmenu: false,
@@ -161,7 +159,6 @@ const dividerLeft = ref(0)
 const value = ref('')
 const options = [
   { value: 'javascript', label: 'JavaScript' },
-  { value: 'markdown', label: 'Markdown' },
   { value: 'java', label: 'Java' },
   { value: 'python', label: 'Python' },
   { value: 'csharp', label: 'C#' },
@@ -177,4 +174,7 @@ const options = [
   { value: 'html', label: 'HTML' },
   { value: 'css', label: 'CSS' }
 ]
+watch(value, (newValue, oldValue) => {
+  previewEditor.setValue('')
+})
 </script>
