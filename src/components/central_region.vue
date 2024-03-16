@@ -51,19 +51,19 @@
 import { ref, onMounted, watch } from 'vue'
 import * as monaco from 'monaco-editor'
 import $bus from '../bus'
-
+import hljs from 'highlight.js'
 const editorContainer = ref(null)
 const previewContainer = ref(null)
 let leftEditor: any
 let previewEditor: any
 const container = ref<HTMLElement | null>(null)
-const leftWidth = ref(0) // Initial width of the left pane
-const rightWidth = ref(0) // Initial width of the right pane
-let startX = 0 // Initial X position when dragging starts
-let startLeftWidth = 0 // Initial width of the left pane when dragging starts
-let startRightWidth = 0 // Initial width of the right pane when dragging starts
+const leftWidth = ref(0)
+const rightWidth = ref(0)
+let startX = 0
+let startLeftWidth = 0
+let startRightWidth = 0
 
-const MIN_PANE_WIDTH = 400 // Minimum width of the panes
+const MIN_PANE_WIDTH = 400
 
 const startDrag = (event: MouseEvent) => {
   // Prevent text selection while dragging
@@ -94,15 +94,33 @@ const stopDrag = () => {
   document.removeEventListener('mousemove', doDrag)
   document.removeEventListener('mouseup', stopDrag)
 }
+// const highlightCode = () => {
+//   if (!leftEditor || !previewEditor || !value.value) return
+
+//   const code = leftEditor.getValue()
+
+//   previewEditor.setValue(code)
+
+//   monaco.editor.setModelLanguage(previewEditor.getModel(), value.value)
+// }
+
 const highlightCode = () => {
-  if (!leftEditor || !previewEditor || !value.value) return
+  if (!leftEditor || !previewEditor) return;
+  const code = leftEditor.getValue();
+  const language = value.value;
+  let lang; // 声明变量 lang
+  if (language) {
+    previewEditor.setValue(code);
+    monaco.editor.setModelLanguage(previewEditor.getModel(), language);
+  } else {
+    const autoDetectResult = hljs.highlightAuto(code);
+    lang = autoDetectResult.language;
+    previewEditor.setValue(code);
+    monaco.editor.setModelLanguage(previewEditor.getModel(), lang || "");
+  }
+};
 
-  const code = leftEditor.getValue()
 
-  previewEditor.setValue(code)
-
-  monaco.editor.setModelLanguage(previewEditor.getModel(), value.value)
-}
 onMounted(() => {
   // Set initial width for left and right panes
   const containerWidth = container.value?.offsetWidth || 0
@@ -134,9 +152,6 @@ onMounted(() => {
       scrollBeyondLastLine: false
     })
   }
-  leftEditor.onDidChangeModelContent((event) => {
-    highlightCode()
-  })
   if (previewContainer.value) {
     previewEditor = monaco.editor.create(previewContainer.value, {
       value: '',
@@ -174,7 +189,8 @@ const options = [
   { value: 'html', label: 'HTML' },
   { value: 'css', label: 'CSS' }
 ]
-watch(value, (newValue, oldValue) => {
+watch(value, () => {
   previewEditor.setValue('')
 })
+
 </script>
