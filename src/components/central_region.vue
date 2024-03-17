@@ -66,7 +66,6 @@ let startRightWidth = 0
 const MIN_PANE_WIDTH = 400
 
 const startDrag = (event: MouseEvent) => {
-  // Prevent text selection while dragging
   event.preventDefault()
 
   startX = event.clientX
@@ -94,27 +93,21 @@ const stopDrag = () => {
   document.removeEventListener('mousemove', doDrag)
   document.removeEventListener('mouseup', stopDrag)
 }
-// const highlightCode = () => {
-//   if (!leftEditor || !previewEditor || !value.value) return
-
-//   const code = leftEditor.getValue()
-
-//   previewEditor.setValue(code)
-
-//   monaco.editor.setModelLanguage(previewEditor.getModel(), value.value)
-// }
 
 const highlightCode = () => {
   if (!leftEditor || !previewEditor) return;
   const code = leftEditor.getValue();
   const language = value.value;
-  let lang; // 声明变量 lang
+  let lang;
   if (language) {
     previewEditor.setValue(code);
     monaco.editor.setModelLanguage(previewEditor.getModel(), language);
+
   } else {
     const autoDetectResult = hljs.highlightAuto(code);
     lang = autoDetectResult.language;
+    console.log(lang);
+    
     previewEditor.setValue(code);
     monaco.editor.setModelLanguage(previewEditor.getModel(), lang || "");
   }
@@ -152,6 +145,7 @@ onMounted(() => {
       scrollBeyondLastLine: false
     })
   }
+  
   if (previewContainer.value) {
     previewEditor = monaco.editor.create(previewContainer.value, {
       value: '',
