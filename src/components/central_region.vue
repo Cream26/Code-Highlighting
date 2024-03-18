@@ -95,27 +95,32 @@ const stopDrag = () => {
 }
 
 const highlightCode = () => {
-  if (!leftEditor || !previewEditor) return;
-  const code = leftEditor.getValue();
-  const language = value.value;
-  let lang;
-  if (language) {
-    previewEditor.setValue(code);
-    monaco.editor.setModelLanguage(previewEditor.getModel(), language);
+  if (!leftEditor || !previewEditor) return
+  const code = leftEditor.getValue()
+  const defaultCode = ['# Start typing the code here and see the preview on the right.', ''].join(
+    '\n'
+  )
 
-  } else {
-    const autoDetectResult = hljs.highlightAuto(code);
-    lang = autoDetectResult.language;
-    console.log(lang);
-    
-    previewEditor.setValue(code);
-    monaco.editor.setModelLanguage(previewEditor.getModel(), lang || "");
+  if (code.trim() === defaultCode.trim() || !code.trim()) {
+    alert('Please enter code in the left pane before highlighting.')
+    return
   }
-};
+  const language = value.value
+  let lang
+  if (language) {
+    previewEditor.setValue(code)
+    monaco.editor.setModelLanguage(previewEditor.getModel(), language)
+  } else {
+    const autoDetectResult = hljs.highlightAuto(code)
+    lang = autoDetectResult.language
+    console.log(lang)
 
+    previewEditor.setValue(code)
+    monaco.editor.setModelLanguage(previewEditor.getModel(), lang || '')
+  }
+}
 
 onMounted(() => {
-  // Set initial width for left and right panes
   const containerWidth = container.value?.offsetWidth || 0
   leftWidth.value = containerWidth / 2
   rightWidth.value = containerWidth / 2
@@ -127,11 +132,7 @@ onMounted(() => {
 
   if (editorContainer.value) {
     leftEditor = monaco.editor.create(editorContainer.value, {
-      value: [
-        '# Markdown Editor',
-        '',
-        'Start typing Markdown here and see the preview on the right.'
-      ].join('\n'),
+      value: ['# Start typing the code here and see the preview on the right.', ''].join('\n'),
       language: 'plaintext',
 
       automaticLayout: true,
@@ -145,7 +146,7 @@ onMounted(() => {
       scrollBeyondLastLine: false
     })
   }
-  
+
   if (previewContainer.value) {
     previewEditor = monaco.editor.create(previewContainer.value, {
       value: '',
@@ -186,5 +187,4 @@ const options = [
 watch(value, () => {
   previewEditor.setValue('')
 })
-
 </script>

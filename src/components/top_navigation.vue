@@ -40,7 +40,7 @@
             </div>
           </template>
         </el-dialog>
-        <el-button type="primary">Issue</el-button>
+
         <el-divider direction="vertical" class="h-8 mx-3" />
         <el-switch
           v-model="dark"
@@ -70,7 +70,7 @@ import { ref } from 'vue'
 import $bus from '../bus'
 import { Moon, Sunny } from '@element-plus/icons-vue'
 const dark = ref<boolean>(false)
-const centerDialogVisible = ref(false)
+const centerDialogVisible = ref(true)
 const changeTheme = () => {
   const root = document.documentElement
   dark.value ? (root.className = 'dark') : (root.className = '')
